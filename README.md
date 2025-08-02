@@ -9,7 +9,7 @@
 
 ✅ **Vollständig offline** - Alle Daten bleiben in Ihrem Browser  
 ✅ **Flexible Erfassung** - Keine Pflichtfelder (außer Datum)  
-✅ **Dokumentenarchiv** - PDFs und Bilder direkt anhängen (bis 5MB)  
+✅ **Dokumentenarchiv** - Nur PDFs und Bilder (JPG/PNG) direkt anhängen (bis 5MB)
 ✅ **Live-Statistiken** - Übersicht nach Kategorien und Beträgen  
 ✅ **Einfacher Export** - ZIP mit allen Daten + Dokumenten  
 ✅ **Responsive Design** - Optimiert für Desktop & Mobile  
@@ -29,7 +29,7 @@ git clone https://github.com/TimInTech/Brief-Dashboard.git
 1. **Brief erfassen**:
    - Datum (automatisch vorausgefüllt)
    - Optionale Felder: Absender, Betreff, Betrag, Frist
-   - Dokumente anhängen (PDF/JPG/PNG)
+   - Dokumente anhängen (nur PDF, JPG oder PNG)
 
 2. **Verwalten**:
    - Filter nach Kategorie/Status
