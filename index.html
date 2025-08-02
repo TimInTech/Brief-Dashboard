@@ -224,7 +224,15 @@
     // Globale Variablen
     const form = document.getElementById("briefForm");
     const tableBody = document.querySelector("#briefTable tbody");
-    let eintraege = JSON.parse(localStorage.getItem("briefEintraege")) || [];
+    let eintraege = [];
+    try {
+      const storedEntries = localStorage.getItem("briefEintraege");
+      eintraege = storedEntries ? JSON.parse(storedEntries) : [];
+    } catch (e) {
+      eintraege = [];
+      localStorage.removeItem("briefEintraege");
+      alert("Gespeicherte Einträge sind ungültig oder nicht zugänglich und wurden zurückgesetzt.");
+    }
 
     // Initialisierung
     window.addEventListener("load", () => {
@@ -236,8 +244,14 @@
 
     // Daten laden
     function loadData() {
-      const savedData = localStorage.getItem("briefEintraege");
-      if (savedData) eintraege = JSON.parse(savedData);
+      try {
+        const savedData = localStorage.getItem("briefEintraege");
+        eintraege = savedData ? JSON.parse(savedData) : [];
+      } catch (e) {
+        eintraege = [];
+        localStorage.removeItem("briefEintraege");
+        alert("Gespeicherte Einträge sind ungültig oder nicht zugänglich und wurden zurückgesetzt.");
+      }
       renderTabelle();
       updateStatistik();
     }
@@ -250,8 +264,16 @@
 
     // Entwurf laden
     function loadDraft() {
-      const draft = JSON.parse(localStorage.getItem("briefDraft"));
-      if (draft) {
+      let draft = {};
+      try {
+        const savedDraft = localStorage.getItem("briefDraft");
+        draft = savedDraft ? JSON.parse(savedDraft) : {};
+      } catch (e) {
+        draft = {};
+        localStorage.removeItem("briefDraft");
+        alert("Gespeicherter Entwurf ist ungültig oder nicht zugänglich und wurde zurückgesetzt.");
+      }
+      if (Object.keys(draft).length > 0) {
         if (draft.datum) document.getElementById('datum').value = draft.datum;
         if (draft.absender) document.getElementById('absender').value = draft.absender;
         if (draft.betreff) document.getElementById('betreff').value = draft.betreff;
