@@ -22,7 +22,10 @@
 
 1. Lade die Datei [`index.html`](../blob/main/index.html) herunter  
 2. Öffne sie per Doppelklick im Browser (Chrome oder Firefox empfohlen)  
-3. Beginne sofort mit der Eingabe und verwalte deine Briefe direkt im Browser  
+3. Beginne sofort mit der Eingabe und verwalte deine Briefe direkt im Browser
+   
+🌐 **Live-Demo:** [https://timintech.github.io/Brief-Dashboard/](https://timintech.github.io/Brief-Dashboard/)
+
 
 Alternativ via Git:
 
