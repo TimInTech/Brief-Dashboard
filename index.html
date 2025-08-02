@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>📬 Brief-Dashboard – FINAL V3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body *:not(#druckbereich):not(#druckbereich *) {
+        visibility: hidden;
+      }
+      #druckbereich, #druckbereich * {
+        visibility: visible;
+      }
+      #druckbereich {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+    }
+  </style>
+</head>
+<body class="p-6 bg-gray-100">
+  <h1 class="text-2xl font-bold mb-4">📬 Brief-Dashboard – lokal, sicher & statistisch</h1>
+
+  <div class="bg-white p-4 rounded shadow mb-6">
+    <h2 class="text-lg font-semibold mb-2">ℹ️ Hinweis zur Nutzung</h2>
+    <p class="text-sm mb-2">Dieses Dashboard speichert deine Briefeingaben ausschließlich im lokalen Speicher deines Browsers. Durch Klick auf <strong>🔄 Daten exportieren</strong> kannst du deine Daten als <code>.json</code>-Datei sichern. Diese Datei lässt sich später mit <strong>📥 JSON importieren</strong> wiederherstellen – z. B. bei einem PC-Wechsel oder zur Archivierung.</p>
+    <p class="text-sm mb-2">💡 <strong>Empfohlen:</strong> Sichere regelmäßig deine Einträge per Export. Die Datei kann auch in Excel geöffnet, in Obsidian eingebunden oder auf GitHub archiviert werden.</p>
+    <p class="text-sm">🛠️ Erstellt & gepflegt von <strong>TimInTech</strong> → <a href="https://github.com/TimInTech" class="text-blue-600 underline">GitHub-Profil ansehen</a></p>
+  </div>
+
+  <form id="briefForm" class="space-y-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <input type="date" id="datum" class="p-2 border rounded" required>
+      <input type="text" id="absender" placeholder="Absender" class="p-2 border rounded" required>
+      <input type="text" id="betreff" placeholder="Betreff" class="p-2 border rounded" required>
+      <input type="number" step="0.01" id="betrag" placeholder="Betrag (€)" class="p-2 border rounded">
+      <input type="date" id="frist" class="p-2 border rounded">
+      <select id="kategorie" class="p-2 border rounded">
+        <option>🟥 Gericht / Inkasso</option>
+        <option>🟧 Versorger / Banken</option>
+        <option>🟨 Behörden / Krankenkassen</option>
+        <option>🟩 Werbung / Privat</option>
+      </select>
+      <select id="status" class="p-2 border rounded">
+        <option>🔴 offen</option>
+        <option>🟡 in Bearbeitung</option>
+        <option>🟢 erledigt</option>
+      </select>
+    </div>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Eintrag speichern</button>
+  </form>
+
+  <div class="mb-4 flex flex-wrap gap-4 items-center">
+    <label for="filterKategorie" class="text-sm font-medium">📂 Nach Kategorie filtern:</label>
+    <select id="filterKategorie" class="p-2 border rounded">
+      <option value="">Alle anzeigen</option>
+      <option>🟥 Gericht / Inkasso</option>
+      <option>🟧 Versorger / Banken</option>
+      <option>🟨 Behörden / Krankenkassen</option>
+      <option>🟩 Werbung / Privat</option>
+    </select>
+
+    <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded">🖨️ Liste drucken (PDF)</button>
+
+    <button onclick="exportiereJSON()" class="bg-green-600 text-white px-4 py-2 rounded">🔄 Daten exportieren</button>
+    <label class="inline-block bg-gray-200 px-4 py-2 rounded cursor-pointer">
+      📥 JSON importieren
+      <input type="file" accept=".json" onchange="importiereJSON(event)" class="hidden">
+    </label>
+  </div>
+
+  <div id="druckbereich">
+    <table class="bg-white w-full text-sm" id="briefTable">
+      <thead>
+        <tr class="bg-gray-200">
+          <th>Datum</th><th>Absender</th><th>Betreff</th><th>Betrag</th><th>Frist</th><th>Kategorie</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="mt-10 p-5 bg-yellow-50 rounded-lg border border-yellow-200">
+    <h2 class="text-xl font-bold mb-4">📊 Statistiken & Auswertung</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-yellow-800">
+      <div>
+        <h3 class="font-semibold mb-2">Briefe nach Kategorie:</h3>
+        <ul class="list-disc list-inside space-y-1">
+          <li>🔴 Gericht / Inkasso: <span id="catRed">0</span></li>
+          <li>🟠 Versorger / Banken: <span id="catOrange">0</span></li>
+          <li>🟡 Behörde / Krankenkasse: <span id="catYellow">0</span></li>
+          <li>🟢 Werbung / Privat: <span id="catGreen">0</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-semibold mb-2">Briefe nach Status:</h3>
+        <ul class="list-disc list-inside space-y-1">
+          <li>🔴 offen: <span id="statusOpen">0</span></li>
+          <li>🟡 in Bearbeitung: <span id="statusBearbeitung">0</span></li>
+          <li>🟢 erledigt: <span id="statusErledigt">0</span></li>
+        </ul>
+        <h4 class="mt-4 font-semibold">Summe offener Beträge:</h4>
+        <p class="text-2xl font-bold text-red-700"><span id="summeOffen">0.00</span> €</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("briefForm");
+    const tableBody = document.querySelector("#briefTable tbody");
+    let eintraege = JSON.parse(localStorage.getItem("briefEintraege")) || [];
+
+    function getStatusFarbe(status) {
+      if (status.includes('🔴')) return 'bg-red-100';
+      if (status.includes('🟡')) return 'bg-yellow-100';
+      if (status.includes('🟢')) return 'bg-green-100';
+      return '';
+    }
+
+    function speichereUndRender() {
+      localStorage.setItem("briefEintraege", JSON.stringify(eintraege));
+      renderTabelle();
+      updateStatistik();
+    }
+
+    function renderTabelle() {
+      const filter = document.getElementById('filterKategorie').value;
+      tableBody.innerHTML = "";
+      eintraege.forEach(eintrag => {
+        if (filter && eintrag.kategorie !== filter) return;
+        const row = document.createElement("tr");
+        row.className = getStatusFarbe(eintrag.status);
+        row.innerHTML = `
+          <td>${eintrag.datum}</td>
+          <td>${eintrag.absender}</td>
+          <td>${eintrag.betreff}</td>
+          <td>${eintrag.betrag}</td>
+          <td>${eintrag.frist}</td>
+          <td>${eintrag.kategorie}</td>
+          <td>${eintrag.status}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const neuerEintrag = {
+        datum: form.datum.value,
+        absender: form.absender.value,
+        betreff: form.betreff.value,
+        betrag: form.betrag.value || "-",
+        frist: form.frist.value || "-",
+        kategorie: form.kategorie.value,
+        status: form.status.value
+      };
+      eintraege.push(neuerEintrag);
+      speichereUndRender();
+      form.reset();
+    });
+
+    function exportiereJSON() {
+      const blob = new Blob([JSON.stringify(eintraege, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `briefdaten_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importiereJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const daten = JSON.parse(e.target.result);
+          if (Array.isArray(daten)) {
+            eintraege = daten;
+            speichereUndRender();
+            alert('Import erfolgreich. Daten wurden geladen.');
+          } else {
+            alert('Ungültiges JSON-Format. Erwartet wird ein Array.');
+          }
+        } catch (err) {
+          alert('Fehler beim Importieren: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function updateStatistik() {
+      let catRed = 0, catOrange = 0, catYellow = 0, catGreen = 0;
+      let statusOpen = 0, statusBearbeitung = 0, statusErledigt = 0;
+      let summe = 0;
+
+      eintraege.forEach(e => {
+        if (e.kategorie.includes('🟥')) catRed++;
+        if (e.kategorie.includes('🟧')) catOrange++;
+        if (e.kategorie.includes('🟨')) catYellow++;
+        if (e.kategorie.includes('🟩')) catGreen++;
+
+        if (e.status.includes('🔴')) statusOpen++;
+        if (e.status.includes('🟡')) statusBearbeitung++;
+        if (e.status.includes('🟢')) statusErledigt++;
+
+        const betrag = parseFloat((e.betrag || '').replace(',', '.'));
+        if (!isNaN(betrag) && e.status.includes('🔴')) {
+          summe += betrag;
+        }
+      });
+
+      document.getElementById('catRed').textContent = catRed;
+      document.getElementById('catOrange').textContent = catOrange;
+      document.getElementById('catYellow').textContent = catYellow;
+      document.getElementById('catGreen').textContent = catGreen;
+
+      document.getElementById('statusOpen').textContent = statusOpen;
+      document.getElementById('statusBearbeitung').textContent = statusBearbeitung;
+      document.getElementById('statusErledigt').textContent = statusErledigt;
+      document.getElementById('summeOffen').textContent = summe.toFixed(2);
+    }
+
+    document.getElementById('filterKategorie').addEventListener('change', renderTabelle);
+
+    window.addEventListener("load", () => {
+      renderTabelle();
+      updateStatistik();
+    });
+  </script>
+</body>
+</html>
