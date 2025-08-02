@@ -375,24 +375,57 @@
           `;
         }
         
-        row.innerHTML = `
-          <td class="p-2 border">${formatDate(eintrag.datum)}</td>
-          <td class="p-2 border">${eintrag.absender || '-'}</td>
-          <td class="p-2 border">${eintrag.betreff || '-'}</td>
-          <td class="p-2 border text-right">${eintrag.betrag ? parseFloat(eintrag.betrag).toFixed(2) + " €" : "-"}</td>
-          <td class="p-2 border">${eintrag.kategorie}</td>
-          <td class="p-2 border">${eintrag.status}</td>
-          <td class="p-2 border">
-            <div class="flex gap-1">
-              <button onclick="viewEntry(${index})" class="text-xs bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded">
-                Ansehen
-              </button>
-              <button onclick="deleteEntry(${index})" class="text-xs bg-red-100 hover:bg-red-200 px-2 py-1 rounded">
-                Löschen
-              </button>
-            </div>
-          </td>
-        `;
+        const dateCell = document.createElement('td');
+        dateCell.className = 'p-2 border';
+        dateCell.textContent = formatDate(eintrag.datum);
+
+        const absenderCell = document.createElement('td');
+        absenderCell.className = 'p-2 border';
+        absenderCell.textContent = eintrag.absender || '-';
+
+        const betreffCell = document.createElement('td');
+        betreffCell.className = 'p-2 border';
+        betreffCell.textContent = eintrag.betreff || '-';
+
+        const betragCell = document.createElement('td');
+        betragCell.className = 'p-2 border text-right';
+        betragCell.textContent = eintrag.betrag ? parseFloat(eintrag.betrag).toFixed(2) + ' €' : '-';
+
+        const kategorieCell = document.createElement('td');
+        kategorieCell.className = 'p-2 border';
+        kategorieCell.textContent = eintrag.kategorie;
+
+        const statusCell = document.createElement('td');
+        statusCell.className = 'p-2 border';
+        statusCell.textContent = eintrag.status;
+
+        const actionsCell = document.createElement('td');
+        actionsCell.className = 'p-2 border';
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'flex gap-1';
+
+        const viewButton = document.createElement('button');
+        viewButton.className = 'text-xs bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded';
+        viewButton.textContent = 'Ansehen';
+        viewButton.addEventListener('click', () => viewEntry(index));
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'text-xs bg-red-100 hover:bg-red-200 px-2 py-1 rounded';
+        deleteButton.textContent = 'Löschen';
+        deleteButton.addEventListener('click', () => deleteEntry(index));
+
+        actionsDiv.appendChild(viewButton);
+        actionsDiv.appendChild(deleteButton);
+        actionsCell.appendChild(actionsDiv);
+
+        row.appendChild(dateCell);
+        row.appendChild(absenderCell);
+        row.appendChild(betreffCell);
+        row.appendChild(betragCell);
+        row.appendChild(kategorieCell);
+        row.appendChild(statusCell);
+        row.appendChild(actionsCell);
+
         tableBody.appendChild(row);
       });
     }
