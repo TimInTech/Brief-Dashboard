@@ -289,13 +289,19 @@
       let dokumenteData = [];
       
       if (files.length > 0) {
+        const allowedTypes = ['application/pdf'];
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
           if (file.size > 5 * 1024 * 1024) {
             alert(`Datei ${file.name} ist zu groß (max. 5MB)`);
             continue;
           }
-          
+
+          if (!(allowedTypes.includes(file.type) || file.type.startsWith('image/'))) {
+            alert(`Datei ${file.name} hat einen nicht unterstützten Dateityp. Erlaubt sind PDF und Bilder (JPG/PNG).`);
+            continue;
+          }
+
           const dataUrl = await readFileAsDataURL(file);
           dokumenteData.push({
             name: file.name,
