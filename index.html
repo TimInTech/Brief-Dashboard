@@ -211,10 +211,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
               <option>📝 In Bearbeitung</option>
               <option>✅ Erledigt</option>
             </select>
-            
+
             <button onclick="exportAllAsZip()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
               Exportieren
             </button>
+           <button onclick="exportTableAsExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+             Als Excel exportieren
+           </button>
           </div>
         </div>
 
@@ -564,6 +567,45 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         eintraege.splice(index, 1);
         saveAndRender();
       }
+    }
+
+    // Tabelle als XLSX exportieren
+    function exportTableAsExcel() {
+      const originalTable = document.getElementById("briefTable");
+      const clone = originalTable.cloneNode(true);
+      Array.from(clone.querySelectorAll('tr')).forEach(row => {
+        if (row.lastElementChild) row.removeChild(row.lastElementChild);
+      });
+
+      let sheetData = "<sheetData>";
+      const rows = Array.from(clone.querySelectorAll("tr"));
+      rows.forEach((row, rIdx) => {
+        sheetData += `<row r="${rIdx + 1}">`;
+        Array.from(row.children).forEach((cell, cIdx) => {
+          const cellRef = String.fromCharCode(65 + cIdx) + (rIdx + 1);
+          const text = cell.textContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          sheetData += `<c r="${cellRef}" t="inlineStr"><is><t>${text}</t></is></c>`;
+        });
+        sheetData += "</row>";
+      });
+      sheetData += "</sheetData>";
+
+      const worksheet = `<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${sheetData}</worksheet>`;
+      const workbook = `<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Briefe" sheetId="1" r:id="rId1"/></sheets></workbook>`;
+      const rels = `<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`;
+      const rootRels = `<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+      const contentTypes = `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>`;
+
+      const zip = new JSZip();
+      zip.file("[Content_Types].xml", contentTypes);
+      zip.folder("_rels").file(".rels", rootRels);
+      const xl = zip.folder("xl");
+      xl.file("workbook.xml", workbook);
+      xl.folder("_rels").file("workbook.xml.rels", rels);
+      xl.folder("worksheets").file("sheet1.xml", worksheet);
+      zip.generateAsync({ type: "blob" }).then(content => {
+        saveAs(content, "briefe_export.xlsx");
+      });
     }
 
     // Export als ZIP
