@@ -2,8 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>📬 Brief-Dashboard – FINAL V3</title>
+  <title>📬 Brief-Dashboard PRO | TimInTech</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
     @media print {
       body *:not(#druckbereich):not(#druckbereich *) {
@@ -16,209 +18,417 @@
         position: absolute;
         left: 0;
         top: 0;
+        width: 100%;
       }
+    }
+    .priority-high { background-color: #fee2e2; }
+    .priority-medium { background-color: #fef3c7; }
+    .priority-low { background-color: #dcfce7; }
+    .document-preview {
+      max-width: 100px;
+      max-height: 60px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    #stats-container {
+      background-color: #f8fafc;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-item {
+      margin-bottom: 0.5rem;
+    }
+    .stat-value {
+      font-weight: bold;
+      color: #1e40af;
     }
   </style>
 </head>
-<body class="p-6 bg-gray-100">
-  <h1 class="text-2xl font-bold mb-4">📬 Brief-Dashboard – lokal, sicher & statistisch</h1>
-
-  <div class="bg-white p-4 rounded shadow mb-6">
-    <h2 class="text-lg font-semibold mb-2">ℹ️ Hinweis zur Nutzung</h2>
-    <p class="text-sm mb-2">Dieses Dashboard speichert deine Briefeingaben ausschließlich im lokalen Speicher deines Browsers. Durch Klick auf <strong>🔄 Daten exportieren</strong> kannst du deine Daten als <code>.json</code>-Datei sichern. Diese Datei lässt sich später mit <strong>📥 JSON importieren</strong> wiederherstellen – z. B. bei einem PC-Wechsel oder zur Archivierung.</p>
-    <p class="text-sm mb-2">💡 <strong>Empfohlen:</strong> Sichere regelmäßig deine Einträge per Export. Die Datei kann auch in Excel geöffnet, in Obsidian eingebunden oder auf GitHub archiviert werden.</p>
-    <p class="text-sm">🛠️ Erstellt & gepflegt von <strong>TimInTech</strong> → <a href="https://github.com/TimInTech" class="text-blue-600 underline">GitHub-Profil ansehen</a></p>
-  </div>
-
-  <form id="briefForm" class="space-y-4 mb-6">
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-      <input type="date" id="datum" class="p-2 border rounded" required>
-      <input type="text" id="absender" placeholder="Absender" class="p-2 border rounded" required>
-      <input type="text" id="betreff" placeholder="Betreff" class="p-2 border rounded" required>
-      <input type="number" step="0.01" id="betrag" placeholder="Betrag (€)" class="p-2 border rounded">
-      <input type="date" id="frist" class="p-2 border rounded">
-      <select id="kategorie" class="p-2 border rounded">
-        <option>🟥 Gericht / Inkasso</option>
-        <option>🟧 Versorger / Banken</option>
-        <option>🟨 Behörden / Krankenkassen</option>
-        <option>🟩 Werbung / Privat</option>
-      </select>
-      <select id="status" class="p-2 border rounded">
-        <option>🔴 offen</option>
-        <option>🟡 in Bearbeitung</option>
-        <option>🟢 erledigt</option>
-      </select>
+<body class="bg-gray-50 text-gray-900 p-4 md:p-6 max-w-6xl mx-auto">
+  <!-- Header mit GitHub Link -->
+  <header class="mb-6 flex justify-between items-center border-b pb-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">📬 Brief-Dashboard PRO</h1>
+      <p class="text-gray-600">Lokale Verwaltung Ihrer Post mit Dokumentenarchiv</p>
     </div>
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Eintrag speichern</button>
-  </form>
+    <a href="https://github.com/TimInTech/Brief-Dashboard" target="_blank" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white" class="mr-2">
+        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+      </svg>
+      GitHub
+    </a>
+  </header>
 
-  <div class="mb-4 flex flex-wrap gap-4 items-center">
-    <label for="filterKategorie" class="text-sm font-medium">📂 Nach Kategorie filtern:</label>
-    <select id="filterKategorie" class="p-2 border rounded">
-      <option value="">Alle anzeigen</option>
-      <option>🟥 Gericht / Inkasso</option>
-      <option>🟧 Versorger / Banken</option>
-      <option>🟨 Behörden / Krankenkassen</option>
-      <option>🟩 Werbung / Privat</option>
-    </select>
+  <!-- Hauptbereich -->
+  <div class="grid md:grid-cols-3 gap-6">
+    <!-- Linke Spalte - Formular und Statistik -->
+    <div class="md:col-span-1 space-y-4">
+      <!-- Brief erfassen Formular -->
+      <section class="bg-white border border-gray-200 p-4 rounded shadow">
+        <h2 class="font-bold mb-3 text-lg">Neuen Brief erfassen</h2>
+        <form id="briefForm" class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">Datum</label>
+            <input type="date" id="datum" class="w-full p-2 border rounded">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-1">Absender</label>
+            <input type="text" id="absender" placeholder="Optional" class="w-full p-2 border rounded">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-1">Betreff</label>
+            <input type="text" id="betreff" placeholder="Optional" class="w-full p-2 border rounded">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">Betrag (€)</label>
+              <input type="number" step="0.01" id="betrag" placeholder="Optional" class="w-full p-2 border rounded">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Frist</label>
+              <input type="date" id="frist" placeholder="Optional" class="w-full p-2 border rounded">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-1">Kategorie</label>
+            <select id="kategorie" class="w-full p-2 border rounded">
+              <option value="">-- Bitte wählen --</option>
+              <option>🟥 Gericht / Inkasso</option>
+              <option>🟧 Versorger / Banken</option>
+              <option>🟨 Behörden / Krankenkassen</option>
+              <option>🟩 Werbung / Privat</option>
+              <option>🏫 Schule / Beratung</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-1">Status</label>
+            <select id="status" class="w-full p-2 border rounded">
+              <option>📭 Ungeöffnet</option>
+              <option>📖 Geöffnet</option>
+              <option>📝 In Bearbeitung</option>
+              <option>✅ Erledigt</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-1">Dokumente (PDF/Bild)</label>
+            <input type="file" id="dokumente" multiple accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border rounded">
+            <p class="text-xs text-gray-500 mt-1">Optional: Bis zu 5 Dateien (max. 5MB pro Datei)</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-1">Notizen</label>
+            <textarea id="notizen" class="w-full p-2 border rounded" rows="2" placeholder="Optionale Notizen"></textarea>
+          </div>
+          
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mt-2">
+            Eintrag erstellen
+          </button>
+        </form>
+      </section>
 
-    <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded">🖨️ Liste drucken (PDF)</button>
+      <!-- Statistik -->
+      <section class="bg-white border border-gray-200 p-4 rounded shadow" id="stats-container">
+        <h2 class="font-bold mb-3 text-lg">📊 Statistiken</h2>
+        
+        <div class="mb-4">
+          <h3 class="font-semibold mb-2">Briefe nach Kategorie:</h3>
+          <ul class="space-y-1">
+            <li class="stat-item">🟥 Gericht / Inkasso: <span id="catRed" class="stat-value">0</span></li>
+            <li class="stat-item">🟧 Versorger / Banken: <span id="catOrange" class="stat-value">0</span></li>
+            <li class="stat-item">🟨 Behörde / Krankenkasse: <span id="catYellow" class="stat-value">0</span></li>
+            <li class="stat-item">🟩 Werbung / Privat: <span id="catGreen" class="stat-value">0</span></li>
+            <li class="stat-item">🏫 Schule / Beratung: <span id="catSchool" class="stat-value">0</span></li>
+          </ul>
+        </div>
+        
+        <div class="mb-4">
+          <h3 class="font-semibold mb-2">Briefe nach Status:</h3>
+          <ul class="space-y-1">
+            <li class="stat-item">🔴 offen: <span id="statusOpen" class="stat-value">0</span></li>
+            <li class="stat-item">🟡 in Bearbeitung: <span id="statusBearbeitung" class="stat-value">0</span></li>
+            <li class="stat-item">🟢 erledigt: <span id="statusErledigt" class="stat-value">0</span></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold mb-1">Summe offener Beträge:</h3>
+          <p class="text-xl font-bold text-blue-700"><span id="summeOffen">0.00</span> €</p>
+        </div>
+      </section>
+    </div>
 
-    <button onclick="exportiereJSON()" class="bg-green-600 text-white px-4 py-2 rounded">🔄 Daten exportieren</button>
-    <label class="inline-block bg-gray-200 px-4 py-2 rounded cursor-pointer">
-      📥 JSON importieren
-      <input type="file" accept=".json" onchange="importiereJSON(event)" class="hidden">
-    </label>
-  </div>
+    <!-- Rechte Spalte - Tabelle -->
+    <div class="md:col-span-2">
+      <section class="bg-white border border-gray-200 p-4 rounded shadow">
+        <div class="flex flex-wrap justify-between items-center mb-4">
+          <h2 class="font-bold text-lg">📋 Ihre Briefe</h2>
+          
+          <div class="flex flex-wrap gap-2">
+            <select id="filterKategorie" class="p-2 border rounded text-sm">
+              <option value="">Alle Kategorien</option>
+              <option>🟥 Gericht / Inkasso</option>
+              <option>🟧 Versorger / Banken</option>
+              <option>🟨 Behörden / Krankenkassen</option>
+              <option>🟩 Werbung / Privat</option>
+              <option>🏫 Schule / Beratung</option>
+            </select>
+            
+            <select id="filterStatus" class="p-2 border rounded text-sm">
+              <option value="">Alle Status</option>
+              <option>📭 Ungeöffnet</option>
+              <option>📖 Geöffnet</option>
+              <option>📝 In Bearbeitung</option>
+              <option>✅ Erledigt</option>
+            </select>
+            
+            <button onclick="exportAllAsZip()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+              Exportieren
+            </button>
+          </div>
+        </div>
 
-  <div id="druckbereich">
-    <table class="bg-white w-full text-sm" id="briefTable">
-      <thead>
-        <tr class="bg-gray-200">
-          <th>Datum</th><th>Absender</th><th>Betreff</th><th>Betrag</th><th>Frist</th><th>Kategorie</th><th>Status</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="mt-10 p-5 bg-yellow-50 rounded-lg border border-yellow-200">
-    <h2 class="text-xl font-bold mb-4">📊 Statistiken & Auswertung</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-yellow-800">
-      <div>
-        <h3 class="font-semibold mb-2">Briefe nach Kategorie:</h3>
-        <ul class="list-disc list-inside space-y-1">
-          <li>🔴 Gericht / Inkasso: <span id="catRed">0</span></li>
-          <li>🟠 Versorger / Banken: <span id="catOrange">0</span></li>
-          <li>🟡 Behörde / Krankenkasse: <span id="catYellow">0</span></li>
-          <li>🟢 Werbung / Privat: <span id="catGreen">0</span></li>
-        </ul>
-      </div>
-      <div>
-        <h3 class="font-semibold mb-2">Briefe nach Status:</h3>
-        <ul class="list-disc list-inside space-y-1">
-          <li>🔴 offen: <span id="statusOpen">0</span></li>
-          <li>🟡 in Bearbeitung: <span id="statusBearbeitung">0</span></li>
-          <li>🟢 erledigt: <span id="statusErledigt">0</span></li>
-        </ul>
-        <h4 class="mt-4 font-semibold">Summe offener Beträge:</h4>
-        <p class="text-2xl font-bold text-red-700"><span id="summeOffen">0.00</span> €</p>
-      </div>
+        <div class="overflow-x-auto" id="druckbereich">
+          <table class="w-full text-sm text-left border rounded" id="briefTable">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-2 border">Datum</th>
+                <th class="p-2 border">Absender</th>
+                <th class="p-2 border">Betreff</th>
+                <th class="p-2 border">Betrag</th>
+                <th class="p-2 border">Kategorie</th>
+                <th class="p-2 border">Status</th>
+                <th class="p-2 border">Aktionen</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
     </div>
   </div>
+
+  <footer class="text-center text-sm text-gray-500 mt-10 pt-4 border-t">
+    <p>Entwickelt von <a href="https://github.com/TimInTech" target="_blank" class="text-blue-600 hover:underline">TimInTech</a> | <a href="https://github.com/TimInTech/Brief-Dashboard" target="_blank" class="text-blue-600 hover:underline">GitHub Repository</a></p>
+    <p class="mt-1">Alle Daten werden lokal in Ihrem Browser gespeichert</p>
+  </footer>
 
   <script>
+    // Globale Variablen
     const form = document.getElementById("briefForm");
     const tableBody = document.querySelector("#briefTable tbody");
     let eintraege = JSON.parse(localStorage.getItem("briefEintraege")) || [];
 
-    function getStatusFarbe(status) {
-      if (status.includes('🔴')) return 'bg-red-100';
-      if (status.includes('🟡')) return 'bg-yellow-100';
-      if (status.includes('🟢')) return 'bg-green-100';
-      return '';
+    // Initialisierung
+    window.addEventListener("load", () => {
+      loadData();
+      setCurrentDate();
+      loadDraft();
+      setupAutoSave();
+    });
+
+    // Daten laden
+    function loadData() {
+      const savedData = localStorage.getItem("briefEintraege");
+      if (savedData) eintraege = JSON.parse(savedData);
+      renderTabelle();
+      updateStatistik();
     }
 
-    function speichereUndRender() {
+    // Aktuelles Datum setzen
+    function setCurrentDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('datum').value = today;
+    }
+
+    // Entwurf laden
+    function loadDraft() {
+      const draft = JSON.parse(localStorage.getItem("briefDraft"));
+      if (draft) {
+        if (draft.datum) document.getElementById('datum').value = draft.datum;
+        if (draft.absender) document.getElementById('absender').value = draft.absender;
+        if (draft.betreff) document.getElementById('betreff').value = draft.betreff;
+        if (draft.betrag) document.getElementById('betrag').value = draft.betrag;
+        if (draft.frist) document.getElementById('frist').value = draft.frist;
+        if (draft.kategorie) document.getElementById('kategorie').value = draft.kategorie;
+        if (draft.status) document.getElementById('status').value = draft.status;
+        if (draft.notizen) document.getElementById('notizen').value = draft.notizen;
+      }
+    }
+
+    // Auto-Save einrichten
+    function setupAutoSave() {
+      form.addEventListener("input", () => {
+        const tempData = {
+          datum: form.datum.value,
+          absender: form.absender.value,
+          betreff: form.betreff.value,
+          betrag: form.betrag.value,
+          frist: form.frist.value,
+          kategorie: form.kategorie.value,
+          status: form.status.value,
+          notizen: form.notizen.value
+        };
+        localStorage.setItem("briefDraft", JSON.stringify(tempData));
+      });
+    }
+
+    // Formularverarbeitung
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      // Dokumente verarbeiten
+      const files = document.getElementById('dokumente').files;
+      let dokumenteData = [];
+      
+      if (files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (file.size > 5 * 1024 * 1024) {
+            alert(`Datei ${file.name} ist zu groß (max. 5MB)`);
+            continue;
+          }
+          
+          const dataUrl = await readFileAsDataURL(file);
+          dokumenteData.push({
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            data: dataUrl
+          });
+        }
+      }
+      
+      const neuerEintrag = {
+        id: Date.now(),
+        datum: form.datum.value || new Date().toISOString().split('T')[0],
+        absender: form.absender.value || null,
+        betreff: form.betreff.value || null,
+        betrag: form.betrag.value || null,
+        frist: form.frist.value || null,
+        kategorie: form.kategorie.value || "🟩 Werbung / Privat",
+        status: form.status.value || "📭 Ungeöffnet",
+        notizen: form.notizen.value || null,
+        dokumente: dokumenteData,
+        erstelltAm: new Date().toISOString()
+      };
+      
+      eintraege.push(neuerEintrag);
+      saveAndRender();
+      form.reset();
+      setCurrentDate();
+      localStorage.removeItem("briefDraft");
+      alert("Eintrag erfolgreich gespeichert!");
+    });
+
+    // Datei als DataURL lesen
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Speichern und Anzeigen
+    function saveAndRender() {
       localStorage.setItem("briefEintraege", JSON.stringify(eintraege));
       renderTabelle();
       updateStatistik();
     }
 
+    // Tabelle rendern
     function renderTabelle() {
-      const filter = document.getElementById('filterKategorie').value;
+      const kategorieFilter = document.getElementById('filterKategorie').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+      
       tableBody.innerHTML = "";
-      eintraege.forEach(eintrag => {
-        if (filter && eintrag.kategorie !== filter) return;
+      
+      // Sortiere nach Datum (neueste zuerst)
+      const sortedEintraege = [...eintraege].sort((a, b) => new Date(b.datum) - new Date(a.datum));
+      
+      sortedEintraege.forEach((eintrag, index) => {
+        if (kategorieFilter && eintrag.kategorie !== kategorieFilter) return;
+        if (statusFilter && eintrag.status !== statusFilter) return;
+        
         const row = document.createElement("tr");
-        row.className = getStatusFarbe(eintrag.status);
+        row.className = getPriorityClass(eintrag.kategorie);
+        
+        // Dokumenten-Icons
+        let docIcons = '';
+        if (eintrag.dokumente && eintrag.dokumente.length > 0) {
+          const docCount = eintrag.dokumente.length;
+          docIcons = `
+            <div class="flex items-center">
+              <span class="mr-1">${docCount}</span>
+              ${eintrag.dokumente.some(d => d.type === 'application/pdf') ? '📄' : ''}
+              ${eintrag.dokumente.some(d => d.type.startsWith('image/')) ? '🖼️' : ''}
+            </div>
+          `;
+        }
+        
         row.innerHTML = `
-          <td>${eintrag.datum}</td>
-          <td>${eintrag.absender}</td>
-          <td>${eintrag.betreff}</td>
-          <td>${eintrag.betrag}</td>
-          <td>${eintrag.frist}</td>
-          <td>${eintrag.kategorie}</td>
-          <td>${eintrag.status}</td>
+          <td class="p-2 border">${formatDate(eintrag.datum)}</td>
+          <td class="p-2 border">${eintrag.absender || '-'}</td>
+          <td class="p-2 border">${eintrag.betreff || '-'}</td>
+          <td class="p-2 border text-right">${eintrag.betrag ? parseFloat(eintrag.betrag).toFixed(2) + " €" : "-"}</td>
+          <td class="p-2 border">${eintrag.kategorie}</td>
+          <td class="p-2 border">${eintrag.status}</td>
+          <td class="p-2 border">
+            <div class="flex gap-1">
+              <button onclick="viewEntry(${index})" class="text-xs bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded">
+                Ansehen
+              </button>
+              <button onclick="deleteEntry(${index})" class="text-xs bg-red-100 hover:bg-red-200 px-2 py-1 rounded">
+                Löschen
+              </button>
+            </div>
+          </td>
         `;
         tableBody.appendChild(row);
       });
     }
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const neuerEintrag = {
-        datum: form.datum.value,
-        absender: form.absender.value,
-        betreff: form.betreff.value,
-        betrag: form.betrag.value || "-",
-        frist: form.frist.value || "-",
-        kategorie: form.kategorie.value,
-        status: form.status.value
-      };
-      eintraege.push(neuerEintrag);
-      speichereUndRender();
-      form.reset();
-    });
-
-    function exportiereJSON() {
-      const blob = new Blob([JSON.stringify(eintraege, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `briefdaten_export_${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function importiereJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const daten = JSON.parse(e.target.result);
-          if (Array.isArray(daten)) {
-            eintraege = daten;
-            speichereUndRender();
-            alert('Import erfolgreich. Daten wurden geladen.');
-          } else {
-            alert('Ungültiges JSON-Format. Erwartet wird ein Array.');
-          }
-        } catch (err) {
-          alert('Fehler beim Importieren: ' + err.message);
-        }
-      };
-      reader.readAsText(file);
-    }
-
+    // Statistik aktualisieren
     function updateStatistik() {
-      let catRed = 0, catOrange = 0, catYellow = 0, catGreen = 0;
+      let catRed = 0, catOrange = 0, catYellow = 0, catGreen = 0, catSchool = 0;
       let statusOpen = 0, statusBearbeitung = 0, statusErledigt = 0;
       let summe = 0;
 
       eintraege.forEach(e => {
+        // Kategorien zählen
         if (e.kategorie.includes('🟥')) catRed++;
         if (e.kategorie.includes('🟧')) catOrange++;
         if (e.kategorie.includes('🟨')) catYellow++;
         if (e.kategorie.includes('🟩')) catGreen++;
+        if (e.kategorie.includes('🏫')) catSchool++;
 
-        if (e.status.includes('🔴')) statusOpen++;
-        if (e.status.includes('🟡')) statusBearbeitung++;
-        if (e.status.includes('🟢')) statusErledigt++;
+        // Status zählen
+        if (e.status.includes('📭') || e.status.includes('🔴')) statusOpen++;
+        if (e.status.includes('📖') || e.status.includes('📝') || e.status.includes('🟡')) statusBearbeitung++;
+        if (e.status.includes('✅') || e.status.includes('🟢')) statusErledigt++;
 
-        const betrag = parseFloat((e.betrag || '').replace(',', '.'));
-        if (!isNaN(betrag) && e.status.includes('🔴')) {
-          summe += betrag;
+        // Summe offener Beträge
+        if ((e.status.includes('📭') || e.status.includes('🔴') || e.status.includes('📖') || e.status.includes('📝') || e.status.includes('🟡')) && e.betrag) {
+          const betrag = parseFloat(e.betrag);
+          if (!isNaN(betrag)) summe += betrag;
         }
       });
 
+      // Statistik aktualisieren
       document.getElementById('catRed').textContent = catRed;
       document.getElementById('catOrange').textContent = catOrange;
       document.getElementById('catYellow').textContent = catYellow;
       document.getElementById('catGreen').textContent = catGreen;
+      document.getElementById('catSchool').textContent = catSchool;
 
       document.getElementById('statusOpen').textContent = statusOpen;
       document.getElementById('statusBearbeitung').textContent = statusBearbeitung;
@@ -226,12 +436,72 @@
       document.getElementById('summeOffen').textContent = summe.toFixed(2);
     }
 
-    document.getElementById('filterKategorie').addEventListener('change', renderTabelle);
+    // Eintrag anzeigen
+    function viewEntry(index) {
+      const eintrag = eintraege[index];
+      let message = `Details:\nDatum: ${formatDate(eintrag.datum)}\nAbsender: ${eintrag.absender || '-'}\nBetreff: ${eintrag.betreff || '-'}\nBetrag: ${eintrag.betrag || '-'}\nStatus: ${eintrag.status}`;
+      
+      if (eintrag.notizen) {
+        message += `\nNotizen: ${eintrag.notizen}`;
+      }
+      
+      if (eintrag.dokumente && eintrag.dokumente.length > 0) {
+        message += `\n\nAnhänge (${eintrag.dokumente.length}):`;
+        eintrag.dokumente.forEach(doc => {
+          message += `\n- ${doc.name} (${(doc.size / 1024).toFixed(1)} KB)`;
+        });
+      }
+      
+      alert(message);
+    }
 
-    window.addEventListener("load", () => {
-      renderTabelle();
-      updateStatistik();
-    });
+    // Eintrag löschen
+    function deleteEntry(index) {
+      if (confirm("Diesen Eintrag wirklich löschen?")) {
+        eintraege.splice(index, 1);
+        saveAndRender();
+      }
+    }
+
+    // Export als ZIP
+    function exportAllAsZip() {
+      const zip = new JSZip();
+      const dataFolder = zip.folder("briefdaten");
+      
+      // JSON mit allen Einträgen
+      dataFolder.file("briefe.json", JSON.stringify(eintraege, null, 2));
+      
+      // Dokumente hinzufügen
+      eintraege.forEach((eintrag, i) => {
+        if (eintrag.dokumente && eintrag.dokumente.length > 0) {
+          const entryFolder = dataFolder.folder(`eintrag_${i}`);
+          eintrag.dokumente.forEach((doc, j) => {
+            const base64Data = doc.data.split(',')[1];
+            entryFolder.file(doc.name, base64Data, { base64: true });
+          });
+        }
+      });
+      
+      // ZIP erstellen und herunterladen
+      zip.generateAsync({ type: "blob" }).then(content => {
+        saveAs(content, `briefe_export_${new Date().toISOString().split('T')[0]}.zip`);
+        alert("Export erfolgreich erstellt!");
+      });
+    }
+
+    // Hilfsfunktionen
+    function formatDate(dateString) {
+      if (!dateString) return "-";
+      const date = new Date(dateString);
+      return date.toLocaleDateString('de-DE');
+    }
+
+    function getPriorityClass(kategorie) {
+      if (kategorie.includes('🟥')) return 'priority-high';
+      if (kategorie.includes('🟧')) return 'priority-medium';
+      if (kategorie.includes('🟨')) return 'priority-medium';
+      return 'priority-low';
+    }
   </script>
 </body>
 </html>
