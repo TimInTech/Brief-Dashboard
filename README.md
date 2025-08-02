@@ -1,6 +1,6 @@
 # 📬 Brief-Dashboard PRO
 
-![Screenshot](assets/screenshot.png)
+![Screenshot](screenshot.png)
 
 **Lokale Verwaltung Ihrer Post mit Dokumentenarchiv**  
 *Entwickelt von [TimInTech](https://github.com/TimInTech)*
