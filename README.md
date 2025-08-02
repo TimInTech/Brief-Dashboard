@@ -5,40 +5,54 @@
 **Lokale Verwaltung Ihrer Post mit Dokumentenarchiv**  
 *Entwickelt von [TimInTech](https://github.com/TimInTech)*
 
+---
+
 ## ✨ Funktionen
 
-✅ **Vollständig offline** - Alle Daten bleiben in Ihrem Browser  
-✅ **Flexible Erfassung** - Keine Pflichtfelder (außer Datum)  
-✅ **Dokumentenarchiv** - Nur PDFs und Bilder (JPG/PNG) direkt anhängen (bis 5MB)
-✅ **Live-Statistiken** - Übersicht nach Kategorien und Beträgen  
-✅ **Einfacher Export** - ZIP mit allen Daten + Dokumenten  
-✅ **Responsive Design** - Optimiert für Desktop & Mobile  
+✅ **Vollständig offline** – Alle Daten bleiben in Ihrem Browser  
+✅ **Flexible Erfassung** – Keine Pflichtfelder (außer Datum)  
+✅ **Dokumentenarchiv** – Nur PDFs und Bilder (JPG/PNG) direkt anhängen (bis 5 MB)  
+✅ **Live-Statistiken** – Übersicht nach Kategorien und Beträgen  
+✅ **Einfacher Export** – ZIP mit allen Daten + Dokumenten  
+✅ **Responsive Design** – Optimiert für Desktop & Mobile  
+
+---
 
 ## 📥 Installation
 
-1. [Repository herunterladen](https://github.com/TimInTech/Brief-Dashboard/archive/main.zip)
-2. `index.html` im Browser öffnen
-3. Optional: Zu Lesezeichen hinzufügen
+1. Lade die Datei [`index.html`](../blob/main/index.html) herunter  
+2. Öffne sie per Doppelklick im Browser (Chrome oder Firefox empfohlen)  
+3. Beginne sofort mit der Eingabe und verwalte deine Briefe direkt im Browser  
+
+Alternativ via Git:
 
 ```bash
 git clone https://github.com/TimInTech/Brief-Dashboard.git
-```
+````
+
+---
 
 ## 🖥️ Nutzung
 
-1. **Brief erfassen**:
-   - Datum (automatisch vorausgefüllt)
-   - Optionale Felder: Absender, Betreff, Betrag, Frist
-   - Dokumente anhängen (nur PDF, JPG oder PNG)
+### 1. Brief erfassen:
 
-2. **Verwalten**:
-   - Filter nach Kategorie/Status
-   - Status ändern (📭→📖→✅)
-   - Dokumente ansehen/löschen
+* Datum (automatisch vorausgefüllt)
+* Optionale Felder: Absender, Betreff, Betrag, Frist
+* Dokumente anhängen (nur PDF, JPG, PNG – max. 5 Dateien)
 
-3. **Exportieren**:
-   - Komplettarchiv als ZIP (inkl. Anhänge)
-   - Automatische Sicherungen im Browser
+### 2. Verwalten:
+
+* Filter nach Kategorie oder Status
+* Status ändern: 📭 „offen“ → 📖 „in Bearbeitung“ → ✅ „erledigt“
+* Anhänge anzeigen oder entfernen
+
+### 3. Exportieren:
+
+* Komplettes ZIP-Archiv mit Einträgen und Anhängen
+* Optionale Einzel-Export-Funktion je Brief
+* Automatische Sicherung über `localStorage`
+
+---
 
 ## 📊 Beispiel-Statistik
 
@@ -58,15 +72,20 @@ Briefe nach Status:
 Summe offener Beträge: 127,89 €
 ```
 
+---
+
 ## 💻 Technologie
 
-- **Frontend**: HTML5, CSS3, JavaScript  
-- **UI**: [Tailwind CSS](https://tailwindcss.com/)  
-- **Export**: [JSZip](https://stuk.github.io/jszip/)  
-- **Kompatibilität**: Chrome, Firefox, Edge, Safari  
+* **Frontend**: HTML5, CSS3, JavaScript
+* **UI-Framework**: [Tailwind CSS (eingebettet)](https://tailwindcss.com/)
+* **Export & Archivierung**: [JSZip](https://stuk.github.io/jszip/), [FileSaver.js](https://github.com/eligrey/FileSaver.js)
+* **Kompatibilität**: Chrome, Firefox, Edge, Safari – vollständig offline nutzbar
+
+---
 
 ## 📜 Lizenz
 
-[MIT License](LICENSE) - Open Source und frei nutzbar  
+Veröffentlicht unter der [MIT License](LICENSE) – Open Source, privat und gewerblich frei nutzbar.
 
 ---
+
